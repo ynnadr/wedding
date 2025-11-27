@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Undangan Pernikahan - Demo</title>
+    <style>
+        /* Mobile First Design: Base styles for mobile, then enhance for larger screens */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            overflow-x: hidden;
+            scroll-behavior: smooth;
+        }
+
+        /* Cover Page */
+        .cover {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000"><defs><radialGradient id="a" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="%23ff9a9e" /><stop offset="100%" stop-color="%23fecfef" /></radialGradient></defs><rect width="1000" height="1000" fill="url(%23a)" /></svg>') no-repeat center/cover; /* Simple SVG background for demo */
+            position: relative;
+            animation: fadeIn 2s ease-in;
+        }
+
+        .cover h1 {
+            font-size: 2.5em;
+            color: #fff;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            margin-bottom: 1em;
+            animation: bounceIn 1s ease-out;
+        }
+
+        .cover p {
+            font-size: 1.2em;
+            color: #fff;
+            margin-bottom: 2em;
+            animation: fadeInUp 1.5s ease-out;
+        }
+
+        .enter-btn {
+            padding: 1em 2em;
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            animation: pulse 2s infinite;
+        }
+
+        .enter-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        /* Main Content - Hidden initially */
+        .content {
+            display: none;
+            min-height: 100vh;
+            padding: 2em 1em;
+        }
+
+        section {
+            margin-bottom: 3em;
+            padding: 2em;
+            background: rgba(255,255,255,0.8);
+            border-radius: 15px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            animation: slideInUp 1s ease-out;
+        }
+
+        h2 {
+            text-align: center;
+            color: #ff6b6b;
+            margin-bottom: 1em;
+            font-size: 1.8em;
+        }
+
+        /* Countdown Styles */
+        #countdown {
+            text-align: center;
+            margin: 1em 0;
+        }
+
+        .countdown-item {
+            display: inline-block;
+            margin: 0 0.5em;
+            padding: 1em;
+            background: #ff6b6b;
+            color: white;
+            border-radius: 10px;
+            min-width: 4em;
+        }
+
+        .countdown-label {
+            display: block;
+            font-size: 0.8em;
+            margin-top: 0.2em;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes bounceIn {
+            0% { transform: scale(0.3); opacity: 0; }
+            50% { transform: scale(1.05); }
+            70% { transform: scale(0.9); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes slideInUp {
+            from { opacity: 0; transform: translateY(50px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Forms */
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 1em;
+        }
+
+        input, textarea, select, button {
+            padding: 0.8em;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 1em;
+        }
+
+        button {
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        button:hover {
+            background: #ff5252;
+        }
+
+        /* Auto-scroll indicator */
+        .auto-scroll-info {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 0.5em;
+            border-radius: 5px;
+            font-size: 0.8em;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        /* Larger screens */
+        @media (min-width: 768px) {
+            .cover h1 { font-size: 3.5em; }
+            .cover p { font-size: 1.5em; }
+            section { max-width: 800px; margin: 0 auto 3em; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Musik Background -->
+    <audio id="bgMusic" loop>
+        <source src="data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBS7/2s/3gAQBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBS7/2s/3gA=" type="audio/wav"> <!-- Dummy base64 audio for demo; replace with real MP3 URL -->
+        Browser Anda tidak mendukung audio.
+    </audio>
+
+    <!-- Cover Page -->
+    <div class="cover" id="cover">
+        <h1>Kirana & Yogi</h1>
+        <p>Kami akan menikah! Ketuk untuk membuka undangan.</p>
+        <button class="enter-btn" onclick="enterInvitation()">Masuk ke Undangan</button>
+    </div>
+
+    <!-- Main Content -->
+    <div class="content" id="content">
+        <section id="intro">
+            <h2>Selamat Datang!</h2>
+            <p>Dengan rahmat Tuhan Yang Maha Esa, kami mengundang Anda untuk merayakan hari bahagia kami.</p>
+        </section>
+
+        <section id="countdown-section">
+            <h2>Countdown ke Hari Bahagia</h2>
+            <div id="countdown">
+                <div class="countdown-item"><span id="days">00</span><span class="countdown-label">Hari</span></div>
+                <div class="countdown-item"><span id="hours">00</span><span class="countdown-label">Jam</span></div>
+                <div class="countdown-item"><span id="minutes">00</span><span class="countdown-label">Menit</span></div>
+                <div class="countdown-item"><span id="seconds">00</span><span class="countdown-label">Detik</span></div>
+            </div>
+            <p id="event-status">Hari bahagia akan segera tiba!</p>
+        </section>
+
+        <section id="details">
+            <h2>Detail Acara</h2>
+            <p><strong>Tanggal:</strong> 25 April 2025</p>
+            <p><strong>Lokasi:</strong> SWASANA Patrajasa Yudistira Grand Ballroom, Jakarta Selatan</p>
+            <p><strong>Waktu:</strong> Akad 07:00 - Reception 11:00</p>
+        </section>
+
+        <section id="rsvp">
+            <h2>RSVP</h2>
+            <form id="rsvpForm">
+                <input type="text" placeholder="Nama Anda" required>
+                <input type="email" placeholder="Email (opsional)">
+                <select required>
+                    <option value="">Apakah Anda hadir?</option>
+                    <option value="yes">Ya, saya hadir</option>
+                    <option value="no">Maaf, tidak bisa hadir</option>
+                </select>
+                <button type="submit">Kirim RSVP</button>
+            </form>
+        </section>
+
+        <section id="wishes">
+            <h2>Ucapan Selamat</h2>
+            <form id="wishesForm">
+                <textarea placeholder="Tulis ucapan selamat Anda..." rows="4" required></textarea>
+                <button type="submit">Kirim Ucapan</button>
+            </form>
+        </section>
+
+        <section id="gifts">
+            <h2>Hadiah Pernikahan</h2>
+            <p>Doa restu Anda adalah hadiah terbesar. Jika ingin memberi, transfer ke BCA 7772569931 a.n. Yogi Bratajaya.</p>
+        </section>
+    </div>
+
+    <div class="auto-scroll-info" id="scrollInfo">Auto-scroll aktif...</div>
+
+    <script>
+        let isIdle = false;
+        let autoScrollInterval;
+        const scrollSpeed = 1; // Pixels per interval
+        const idleTime = 5000; // 5 detik idle untuk mulai auto-scroll
+        let idleTimer;
+
+        // Musik
+        const music = document.getElementById('bgMusic');
+        music.volume = 0.3; // Volume rendah
+
+        // Target Date for Countdown: 25 April 2025, 12:00 (midday for reception)
+        const targetDate = new Date('2025-04-25T12:00:00').getTime();
+
+        // Countdown Function
+        function updateCountdown() {
+            const now = new Date().getTime();
+            const difference = targetDate - now;
+
+            const days = Math.floor(difference / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((difference % (1000 * 60)) / 1000);
+
+            document.getElementById('days').textContent = days.toString().padStart(2, '0');
+            document.getElementById('hours').textContent = hours.toString().padStart(2, '0');
+            document.getElementById('minutes').textContent = minutes.toString().padStart(2, '0');
+            document.getElementById('seconds').textContent = seconds.toString().padStart(2, '0');
+
+            const statusEl = document.getElementById('event-status');
+            if (difference < 0) {
+                statusEl.textContent = 'Hari bahagia telah tiba! Selamat! 🎉';
+                document.getElementById('countdown').style.display = 'none'; // Hide countdown if past
+            } else {
+                statusEl.textContent = 'Hari bahagia akan segera tiba!';
+            }
+        }
+
+        // Enter Invitation
+        function enterInvitation() {
+            document.getElementById('cover').style.display = 'none';
+            document.getElementById('content').style.display = 'block';
+            music.play().catch(e => console.log('Autoplay blocked:', e)); // Play on interaction
+            startIdleDetection();
+            updateCountdown(); // Initial update
+            setInterval(updateCountdown, 1000); // Update every second
+            // Scroll to top of content
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Idle Detection & Auto-Scroll
+        function startIdleDetection() {
+            document.addEventListener('mousemove', resetIdleTimer);
+            document.addEventListener('keydown', resetIdleTimer);
+            document.addEventListener('touchstart', resetIdleTimer); // Mobile
+            resetIdleTimer();
+        }
+
+        function resetIdleTimer() {
+            clearTimeout(idleTimer);
+            isIdle = false;
+            document.getElementById('scrollInfo').style.opacity = '0';
+            stopAutoScroll();
+            idleTimer = setTimeout(() => {
+                isIdle = true;
+                startAutoScroll();
+                document.getElementById('scrollInfo').style.opacity = '1';
+            }, idleTime);
+        }
+
+        function startAutoScroll() {
+            if (autoScrollInterval) return;
+            autoScrollInterval = setInterval(() => {
+                if (isIdle && window.innerHeight + window.scrollY < document.body.offsetHeight) {
+                    window.scrollBy({ top: scrollSpeed, behavior: 'smooth' });
+                } else {
+                    stopAutoScroll();
+                }
+            }, 50); // Smooth, pelan
+        }
+
+        function stopAutoScroll() {
+            if (autoScrollInterval) {
+                clearInterval(autoScrollInterval);
+                autoScrollInterval = null;
+            }
+        }
+
+        // Dummy Forms
+        document.getElementById('rsvpForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            alert('RSVP Anda telah dikirim! Terima kasih.');
+            e.target.reset();
+        });
+
+        document.getElementById('wishesForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            alert('Ucapan selamat Anda telah dikirim! Semoga bahagia.');
+            e.target.reset();
+        });
+
+        // Tambahan: Pause music on visibility change (untuk mobile)
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                music.pause();
+            } else if (!music.paused) {
+                music.play();
+            }
+        });
+    </script>
+</body>
+</html>
