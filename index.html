@@ -277,6 +277,7 @@
     <script>
         // Load JSON eksternal
         let weddingData = {}; // Placeholder
+        let targetDate; // Akan di-set setelah load data
 
         async function loadExternalData() {
             try {
@@ -339,13 +340,16 @@
 
             // Gifts text (opsional custom)
             document.getElementById('giftsText').innerHTML += `<br><small>Copy nomor untuk transfer mudah.</small>`;
+
+            // Set targetDate setelah data loaded
+            targetDate = parseTargetDate(weddingData.tanggal);
         }
 
         // Update fungsi parseTargetDate untuk gunakan weddingData
         function parseTargetDate(tanggalStr) {
             if (!tanggalStr || tanggalStr === "DD MMMM YYYY") return new Date().getTime(); // Skip jika placeholder
             const months = {
-                'Januari': 0, 'February': 1, 'Maret': 2, 'April': 3, 'Mei': 4, 'Juni': 5,
+                'Januari': 0, 'Februari': 1, 'Maret': 2, 'April': 3, 'Mei': 4, 'Juni': 5,
                 'Juli': 6, 'Agustus': 7, 'September': 8, 'Oktober': 9, 'November': 10, 'Desember': 11,
                 'January': 0, 'Feb': 1, 'March': 2, 'Apr': 3, 'May': 4, 'Jun': 5,
                 'Jul': 6, 'Aug': 7, 'Sep': 8, 'Oct': 9, 'Nov': 10, 'Dec': 11
@@ -365,9 +369,6 @@
         const scrollSpeed = 1; // Pixels per interval
         const idleTime = 5000; // 5 detik idle untuk mulai auto-scroll
         let idleTimer;
-
-        // Target Date for Countdown
-        const targetDate = parseTargetDate(weddingData.tanggal);
 
         // Countdown Function
         function updateCountdown() {
