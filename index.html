@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Undangan Pernikahan - Demo</title>
     <style>
-        /* (CSS sama seperti sebelumnya - copy dari respons lama) */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Arial', sans-serif; line-height: 1.6; color: #333; background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); overflow-x: hidden; scroll-behavior: smooth; }
         .cover { height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000"><defs><radialGradient id="a" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="%23ff9a9e" /><stop offset="100%" stop-color="%23fecfef" /></radialGradient></defs><rect width="1000" height="1000" fill="url(%23a)" /></svg>') no-repeat center/cover; background-size: cover; position: relative; animation: fadeIn 2s ease-in; }
@@ -21,48 +20,44 @@
         .countdown-label { display: block; font-size: 0.8em; margin-top: 0.2em; }
         .rekening-list { list-style: none; padding: 0; }
         .rekening-item { background: #f8f9fa; padding: 1em; margin: 0.5em 0; border-radius: 8px; border-left: 4px solid #ff6b6b; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        @keyframes bounceIn { 0% { transform: scale(0.3); opacity: 0; } 50% { transform: scale(1.05); } 70% { transform: scale(0.9); } 100% { transform: scale(1); opacity: 1; } }
-        @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
-        @keyframes slideInUp { from { opacity: 0; transform: translateY(50px); } to { opacity: 1; transform: translateY(0); } }
         form { display: flex; flex-direction: column; gap: 1em; }
         input, textarea, select, button { padding: 0.8em; border: 1px solid #ddd; border-radius: 8px; font-size: 1em; }
         button { background: #ff6b6b; color: white; border: none; cursor: pointer; transition: background 0.3s ease; }
         button:hover { background: #ff5252; }
         .auto-scroll-info { position: fixed; top: 10px; right: 10px; background: rgba(0,0,0,0.7); color: white; padding: 0.5em; border-radius: 5px; font-size: 0.8em; opacity: 0; transition: opacity 0.3s; }
-        .music-controls { text-align: center; margin: 1em 0; } /* Baru: Kontrol manual */
+        .music-controls { text-align: center; margin: 1em 0; }
         .music-controls button { margin: 0 0.5em; padding: 0.5em 1em; font-size: 0.9em; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes bounceIn { 0% { transform: scale(0.3); opacity: 0; } 50% { transform: scale(1.05); } 70% { transform: scale(0.9); } 100% { transform: scale(1); opacity: 1; } }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+        @keyframes slideInUp { from { opacity: 0; transform: translateY(50px); } to { opacity: 1; transform: translateY(0); } }
         @media (min-width: 768px) { .cover h1 { font-size: 3.5em; } .cover p { font-size: 1.5em; } section { max-width: 800px; margin: 0 auto 3em; } }
     </style>
 </head>
 <body>
-    <!-- Musik Background -->
     <audio id="bgMusic" loop preload="auto">
-        <source src="" type="audio/mpeg"> <!-- Akan diisi dari JSON -->
+        <source src="" type="audio/mpeg">
         Browser Anda tidak mendukung audio.
     </audio>
 
-    <!-- Cover Page -->
     <div class="cover" id="cover">
         <h1 id="coverTitle">Loading...</h1>
         <p>Kami akan menikah! Ketuk untuk membuka undangan.</p>
         <button class="enter-btn" onclick="enterInvitation()">Masuk ke Undangan</button>
     </div>
 
-    <!-- Main Content -->
     <div class="content" id="content">
         <section id="intro">
             <h2 id="introTitle">Loading...</h2>
             <p id="introText">Loading...</p>
-            <div class="music-controls"> <!-- Baru: Tombol kontrol musik -->
+            <div class="music-controls">
                 <button onclick="playMusic()">▶ Play Musik</button>
                 <button onclick="pauseMusic()">⏸ Pause</button>
                 <p id="musicStatus">Status: Belum dimuat</p>
             </div>
         </section>
 
-        <!-- (Sisanya sama: countdown-section, details, rsvp, wishes, gifts) -->
         <section id="countdown-section">
             <h2>Countdown ke Hari Bahagia</h2>
             <div id="countdown">
@@ -116,68 +111,173 @@
     <script>
         let weddingData = {};
         let targetDate;
+        let countdownInterval;
 
         async function loadExternalData() {
             try {
                 const response = await fetch('wedding-data.json');
-                if (!response.ok) throw new Error('Gagal load JSON');
+                if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
                 weddingData = await response.json();
-                console.log('JSON loaded:', weddingData); // Debug log
+                console.log('JSON loaded successfully:', weddingData);
                 loadData();
             } catch (error) {
                 console.error('Error loading JSON:', error);
-                weddingData = { /* fallback sama seperti sebelumnya */ };
+                // Fallback data
+                weddingData = {
+                    "namaPengantin": { "pengantinWanita": "Pengantin Wanita", "pengantinPria": "Pengantin Pria" },
+                    "tanggal": "DD MMMM YYYY",
+                    "lokasi": "Lokasi Acara",
+                    "waktu": "Waktu Acara",
+                    "rekening": [],
+                    "fileGambar": "",
+                    "fileMusik": ""
+                };
+                console.log('Using fallback data');
                 loadData();
             }
         }
 
         function loadData() {
-            // (Load data sama seperti sebelumnya, tapi tambah log untuk musik)
-            // ... (copy dari respons lama untuk coverTitle, intro, details, gambar, rekening)
+            console.log('Starting loadData...');
+            // Cover title
+            const coupleName = `${weddingData.namaPengantin?.pengantinWanita || 'Wanita'} & ${weddingData.namaPengantin?.pengantinPria || 'Pria'}`;
+            document.getElementById('coverTitle').textContent = coupleName;
+            console.log('Cover updated:', coupleName);
 
+            // Intro
+            document.getElementById('introTitle').textContent = `Selamat untuk ${coupleName}!`;
+            document.getElementById('introText').textContent = `Dengan rahmat Tuhan Yang Maha Esa, kami mengundang Anda untuk merayakan hari bahagia kami.`;
+            console.log('Intro updated');
+
+            // Details
+            document.getElementById('namaPengantin').textContent = coupleName;
+            document.getElementById('tanggal').textContent = weddingData.tanggal || 'Tanggal belum diisi';
+            document.getElementById('lokasi').textContent = weddingData.lokasi || 'Lokasi belum diisi';
+            document.getElementById('waktu').textContent = weddingData.waktu || 'Waktu belum diisi';
+            console.log('Details updated');
+
+            // Gambar
+            if (weddingData.fileGambar) {
+                document.getElementById('cover').style.backgroundImage = `url('${weddingData.fileGambar}')`;
+                console.log('Background image set');
+            }
+
+            // Musik
             const music = document.getElementById('bgMusic');
             if (weddingData.fileMusik) {
-                const newSrc = weddingData.fileMusik;
-                music.innerHTML = `<source src="${newSrc}" type="audio/mpeg">`;
-                music.load(); // Reload audio element
-                console.log('Music src set to:', newSrc); // Debug
-                document.getElementById('musicStatus').textContent = `Dimuat: ${newSrc}`;
+                music.querySelector('source').src = weddingData.fileMusik;
+                music.load();
+                console.log('Music src set to:', weddingData.fileMusik);
+                document.getElementById('musicStatus').textContent = `Dimuat: ${weddingData.fileMusik}`;
             } else {
-                document.getElementById('musicStatus').textContent = 'Tidak ada file musik di JSON';
+                document.getElementById('musicStatus').textContent = 'Tidak ada file musik';
             }
             music.volume = 0.3;
 
+            // Rekening
+            const rekeningList = document.getElementById('rekeningList');
+            rekeningList.innerHTML = '';
+            if (weddingData.rekening && weddingData.rekening.length > 0) {
+                weddingData.rekening.forEach(rek => {
+                    const li = document.createElement('li');
+                    li.className = 'rekening-item';
+                    li.innerHTML = `<strong>${rek.bank || 'Bank'}</strong><br>Nomor: ${rek.nomor || 'N/A'}<br>a.n. ${rek.nama || 'Nama'}`;
+                    rekeningList.appendChild(li);
+                });
+                console.log('Rekening list updated');
+            } else {
+                rekeningList.innerHTML = '<li class="rekening-item">Belum ada data rekening</li>';
+            }
+
+            // Gifts text
+            document.getElementById('giftsText').textContent = 'Doa restu Anda adalah hadiah terbesar. Jika ingin memberi, transfer ke rekening di bawah ini.';
+            document.getElementById('giftsText').innerHTML += '<br><small>Copy nomor untuk transfer mudah.</small>';
+            console.log('Gifts updated');
+
+            // Countdown target
             targetDate = parseTargetDate(weddingData.tanggal);
+            console.log('loadData complete, targetDate:', targetDate);
         }
 
-        // Fungsi baru untuk kontrol manual
-        function playMusic() {
-            const music = document.getElementById('bgMusic');
-            music.play().then(() => {
-                console.log('Music playing');
-                document.getElementById('musicStatus').textContent = 'Sedang diputar';
-            }).catch(e => {
-                console.error('Play failed:', e);
-                alert('Gagal putar musik: ' + e.message + '\nCek console untuk detail.');
-            });
+        function parseTargetDate(tanggalStr) {
+            if (!tanggalStr || tanggalStr.includes('Loading') || tanggalStr === "DD MMMM YYYY") return Date.now();
+            const months = {
+                'Januari': 0, 'Februari': 1, 'Maret': 2, 'April': 3, 'Mei': 4, 'Juni': 5, 'Juli': 6, 'Agustus': 7, 'September': 8, 'Oktober': 9, 'November': 10, 'Desember': 11
+            };
+            const parts = tanggalStr.match(/(\d{1,2})\s+([A-Za-z]+)\s+(\d{4})/);
+            if (!parts) return Date.now();
+            const day = parseInt(parts[1]), monthName = parts[2], year = parseInt(parts[3]);
+            const month = months[monthName] || 0;
+            return new Date(year, month, day, 12, 0, 0).getTime();
         }
 
-        function pauseMusic() {
-            const music = document.getElementById('bgMusic');
-            music.pause();
-            document.getElementById('musicStatus').textContent = 'Dijeda';
+        function updateCountdown() {
+            if (!targetDate) return;
+            const now = Date.now();
+            const difference = targetDate - now;
+            const days = Math.floor(difference / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((difference % (1000 * 60)) / 1000);
+
+            document.getElementById('days').textContent = days.toString().padStart(2, '0');
+            document.getElementById('hours').textContent = hours.toString().padStart(2, '0');
+            document.getElementById('minutes').textContent = minutes.toString().padStart(2, '0');
+            document.getElementById('seconds').textContent = seconds.toString().padStart(2, '0');
+
+            const statusEl = document.getElementById('event-status');
+            if (difference < 0) {
+                statusEl.textContent = 'Hari bahagia telah tiba! Selamat! 🎉';
+                document.getElementById('countdown').style.display = 'none';
+                if (countdownInterval) clearInterval(countdownInterval);
+            } else {
+                statusEl.textContent = 'Hari bahagia akan segera tiba!';
+            }
         }
 
-        // Update enterInvitation: Tambah log
         function enterInvitation() {
             document.getElementById('cover').style.display = 'none';
             document.getElementById('content').style.display = 'block';
             const music = document.getElementById('bgMusic');
-            music.play().catch(e => console.log('Autoplay blocked:', e));
-            // ... (sisa sama)
+            music.play().catch(e => console.log('Play error:', e));
+            startIdleDetection();
+            updateCountdown();
+            countdownInterval = setInterval(updateCountdown, 1000);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        // (Sisa script sama: parseTargetDate, updateCountdown, idle detection, forms, dll.)
+        // Idle & Auto-Scroll (sama seperti sebelumnya)
+        let isIdle = false, autoScrollInterval, scrollSpeed = 1, idleTime = 5000, idleTimer;
+        function startIdleDetection() {
+            ['mousemove', 'keydown', 'touchstart'].forEach(ev => document.addEventListener(ev, resetIdleTimer));
+            resetIdleTimer();
+        }
+        function resetIdleTimer() {
+            clearTimeout(idleTimer); isIdle = false; document.getElementById('scrollInfo').style.opacity = '0'; stopAutoScroll();
+            idleTimer = setTimeout(() => { isIdle = true; startAutoScroll(); document.getElementById('scrollInfo').style.opacity = '1'; }, idleTime);
+        }
+        function startAutoScroll() { if (autoScrollInterval) return; autoScrollInterval = setInterval(() => { if (isIdle && window.innerHeight + window.scrollY < document.body.offsetHeight) window.scrollBy({ top: scrollSpeed, behavior: 'smooth' }); else stopAutoScroll(); }, 50); }
+        function stopAutoScroll() { if (autoScrollInterval) { clearInterval(autoScrollInterval); autoScrollInterval = null; } }
+
+        // Musik Controls
+        function playMusic() {
+            const music = document.getElementById('bgMusic');
+            music.play().then(() => { console.log('Manual play OK'); document.getElementById('musicStatus').textContent = 'Sedang diputar'; }).catch(e => { console.error('Manual play failed:', e); alert('Gagal: ' + e.message); });
+        }
+        function pauseMusic() {
+            document.getElementById('bgMusic').pause();
+            document.getElementById('musicStatus').textContent = 'Dijeda';
+        }
+
+        // Forms (dummy)
+        document.getElementById('rsvpForm').addEventListener('submit', e => { e.preventDefault(); alert('RSVP dikirim!'); e.target.reset(); });
+        document.getElementById('wishesForm').addEventListener('submit', e => { e.preventDefault(); alert('Ucapan dikirim!'); e.target.reset(); });
+
+        // Visibility for music
+        document.addEventListener('visibilitychange', () => {
+            const music = document.getElementById('bgMusic');
+            if (document.hidden) music.pause(); else if (!music.paused) music.play();
+        });
 
         window.addEventListener('load', loadExternalData);
     </script>
