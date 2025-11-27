@@ -1,23 +1,18 @@
 {
   "namaPengantin": {
-    "pengantinWanita": "Kirana Sausan Chandrawati",
-    "pengantinPria": "Yogi Bratajaya"
+    "pengantinWanita": "Elara Prabowo",
+    "pengantinPria": "Aria Susanto"
   },
-  "tanggal": "26 April 2026",
-  "lokasi": "SWASANA Patrajasa Yudistira Grand Ballroom, Jakarta Selatan",
+  "tanggal": "15 Juni 2026",
+  "lokasi": "Ritz-Carlton Ballroom, Pacific Place, Jakarta",
   "waktu": "Akad 07:00 - Reception 11:00",
   "rekening": [
     {
-      "bank": "BCA",
-      "nomor": "7772569931",
-      "nama": "Yogi Bratajaya"
-    },
-    {
-      "bank": "Mandiri",
-      "nomor": "1670009758375",
-      "nama": "Kirana Sausan Chandrawati"
+      "bank": "BNI",
+      "nomor": "4613730575",
+      "nama": "Aria Susanto"
     }
   ],
-  "fileGambar": "cover-bg.jpg",
-  "fileMusik": "wedding-song.mp3"
+  "fileGambar": "cover-1.jpg",
+  "fileMusik": "song-4.mp3"
 }
