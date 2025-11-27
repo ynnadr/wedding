@@ -1,0 +1,23 @@
+{
+  "namaPengantin": {
+    "pengantinWanita": "Kirana Sausan Chandrawati",
+    "pengantinPria": "Yogi Bratajaya"
+  },
+  "tanggal": "25 April 2025",
+  "lokasi": "SWASANA Patrajasa Yudistira Grand Ballroom, Jakarta Selatan",
+  "waktu": "Akad 07:00 - Reception 11:00",
+  "rekening": [
+    {
+      "bank": "BCA",
+      "nomor": "7772569931",
+      "nama": "Yogi Bratajaya"
+    },
+    {
+      "bank": "Mandiri",
+      "nomor": "1670009758375",
+      "nama": "Kirana Sausan Chandrawati"
+    }
+  ],
+  "fileGambar": "cover-bg.jpg",
+  "fileMusik": "wedding-song.mp3"
+}
