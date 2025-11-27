@@ -5,45 +5,31 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Undangan Pernikahan - Demo</title>
     <style>
-        /* CSS sama seperti sebelumnya, tambah untuk video */
-        .cover {
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            position: relative; /* Untuk video overlay */
-            overflow: hidden;
-            animation: fadeIn 2s ease-in;
-        }
-        .cover::before { /* Placeholder untuk GIF/static */
-            content: '';
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background-size: cover; background-position: center;
-            z-index: -1;
-        }
-        .cover video { /* Untuk MP4 */
-            position: absolute;
-            top: 50%; left: 50%;
-            min-width: 100%; min-height: 100%;
-            width: auto; height: auto;
-            transform: translate(-50%, -50%);
-            z-index: -1;
-            object-fit: cover;
-        }
-        /* (Sisa CSS sama: h1, p, enter-btn, dll.) */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Arial', sans-serif; line-height: 1.6; color: #333; background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); overflow-x: hidden; scroll-behavior: smooth; }
-        .cover h1 { font-size: 2.5em; color: #fff; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); margin-bottom: 1em; animation: bounceIn 1s ease-out; }
-        .cover p { font-size: 1.2em; color: #fff; margin-bottom: 2em; animation: fadeInUp 1.5s ease-out; }
-        .enter-btn { padding: 1em 2em; background: #ff6b6b; color: white; border: none; border-radius: 50px; font-size: 1.1em; cursor: pointer; transition: transform 0.3s ease, box-shadow 0.3s ease; animation: pulse 2s infinite; }
+        .cover { height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; position: relative; overflow: hidden; animation: fadeIn 2s ease-in; z-index: 10; /* Pastikan tombol di atas video */ }
+        .cover::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-size: cover; background-position: center; z-index: -1; }
+        .cover video { position: absolute; top: 50%; left: 50%; min-width: 100%; min-height: 100%; width: auto; height: auto; transform: translate(-50%, -50%); z-index: -2; object-fit: cover; } /* Video di belakang */
+        .cover h1 { font-size: 2.5em; color: #fff; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); margin-bottom: 1em; animation: bounceIn 1s ease-out; z-index: 11; }
+        .cover p { font-size: 1.2em; color: #fff; margin-bottom: 2em; animation: fadeInUp 1.5s ease-out; z-index: 11; }
+        .enter-btn { padding: 1em 2em; background: #ff6b6b; color: white; border: none; border-radius: 50px; font-size: 1.1em; cursor: pointer; transition: transform 0.3s ease, box-shadow 0.3s ease; animation: pulse 2s infinite; z-index: 12; position: relative; } /* Tombol paling atas */
         .enter-btn:hover { transform: scale(1.05); box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
-        .content { display: none; min-height: 100vh; padding: 2em 1em; }
+        .enter-btn:active { pointer-events: auto; } /* Pastikan clickable */
+        .content { display: none; min-height: 100vh; padding: 2em 1em; position: relative; z-index: 1; }
         section { margin-bottom: 3em; padding: 2em; background: rgba(255,255,255,0.8); border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); animation: slideInUp 1s ease-out; }
         h2 { text-align: center; color: #ff6b6b; margin-bottom: 1em; font-size: 1.8em; }
-        /* (Sisa: countdown, forms, dll. sama) */
+        #countdown { text-align: center; margin: 1em 0; }
+        .countdown-item { display: inline-block; margin: 0 0.5em; padding: 1em; background: #ff6b6b; color: white; border-radius: 10px; min-width: 4em; }
+        .countdown-label { display: block; font-size: 0.8em; margin-top: 0.2em; }
+        .rekening-list { list-style: none; padding: 0; }
+        .rekening-item { background: #f8f9fa; padding: 1em; margin: 0.5em 0; border-radius: 8px; border-left: 4px solid #ff6b6b; }
+        form { display: flex; flex-direction: column; gap: 1em; }
+        input, textarea, select, button { padding: 0.8em; border: 1px solid #ddd; border-radius: 8px; font-size: 1em; }
+        button { background: #ff6b6b; color: white; border: none; cursor: pointer; transition: background 0.3s ease; }
+        button:hover { background: #ff5252; }
+        .auto-scroll-info { position: fixed; top: 10px; right: 10px; background: rgba(0,0,0,0.7); color: white; padding: 0.5em; border-radius: 5px; font-size: 0.8em; opacity: 0; transition: opacity 0.3s; }
+        .music-controls { text-align: center; margin: 1em 0; }
+        .music-controls button { margin: 0 0.5em; padding: 0.5em 1em; font-size: 0.9em; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes bounceIn { 0% { transform: scale(0.3); opacity: 0; } 50% { transform: scale(1.05); } 70% { transform: scale(0.9); } 100% { transform: scale(1); opacity: 1; } }
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
@@ -53,69 +39,240 @@
     </style>
 </head>
 <body>
-    <audio id="bgMusic" loop preload="auto"><source src="" type="audio/mpeg"></audio>
+    <audio id="bgMusic" loop preload="auto">
+        <source src="" type="audio/mpeg">
+        Browser Anda tidak mendukung audio.
+    </audio>
 
     <div class="cover" id="cover">
-        <video id="coverVideo" muted loop playsinline style="display:none;"> <!-- Untuk MP4 -->
+        <video id="coverVideo" muted loop playsinline style="display: none;">
             <source src="" type="video/mp4">
         </video>
         <h1 id="coverTitle">Loading...</h1>
         <p>Kami akan menikah! Ketuk untuk membuka undangan.</p>
-        <button class="enter-btn" onclick="enterInvitation()">Masuk ke Undangan</button>
+        <button class="enter-btn" id="enterBtn">Masuk ke Undangan</button> <!-- Hapus onclick, ganti ID -->
     </div>
 
-    <!-- (Content sections sama seperti sebelumnya: intro, countdown, details, rsvp, wishes, gifts) -->
     <div class="content" id="content">
-        <!-- Copy sections dari kode lama -->
+        <section id="intro">
+            <h2 id="introTitle">Loading...</h2>
+            <p id="introText">Loading...</p>
+            <div class="music-controls">
+                <button onclick="playMusic()">▶ Play Musik</button>
+                <button onclick="pauseMusic()">⏸ Pause</button>
+                <p id="musicStatus">Status: Belum dimuat</p>
+            </div>
+        </section>
+
+        <section id="countdown-section">
+            <h2>Countdown ke Hari Bahagia</h2>
+            <div id="countdown">
+                <div class="countdown-item"><span id="days">00</span><span class="countdown-label">Hari</span></div>
+                <div class="countdown-item"><span id="hours">00</span><span class="countdown-label">Jam</span></div>
+                <div class="countdown-item"><span id="minutes">00</span><span class="countdown-label">Menit</span></div>
+                <div class="countdown-item"><span id="seconds">00</span><span class="countdown-label">Detik</span></div>
+            </div>
+            <p id="event-status">Loading...</p>
+        </section>
+
+        <section id="details">
+            <h2>Detail Acara</h2>
+            <p><strong>Nama Pengantin:</strong> <span id="namaPengantin">Loading...</span></p>
+            <p><strong>Tanggal:</strong> <span id="tanggal">Loading...</span></p>
+            <p><strong>Lokasi:</strong> <span id="lokasi">Loading...</span></p>
+            <p><strong>Waktu:</strong> <span id="waktu">Loading...</span></p>
+        </section>
+
+        <section id="rsvp">
+            <h2>RSVP</h2>
+            <form id="rsvpForm">
+                <input type="text" placeholder="Nama Anda" required>
+                <input type="email" placeholder="Email (opsional)">
+                <select required>
+                    <option value="">Apakah Anda hadir?</option>
+                    <option value="yes">Ya, saya hadir</option>
+                    <option value="no">Maaf, tidak bisa hadir</option>
+                </select>
+                <button type="submit">Kirim RSVP</button>
+            </form>
+        </section>
+
+        <section id="wishes">
+            <h2>Ucapan Selamat</h2>
+            <form id="wishesForm">
+                <textarea placeholder="Tulis ucapan selamat Anda..." rows="4" required></textarea>
+                <button type="submit">Kirim Ucapan</button>
+            </form>
+        </section>
+
+        <section id="gifts">
+            <h2>Hadiah Pernikahan</h2>
+            <p id="giftsText">Loading...</p>
+            <ul class="rekening-list" id="rekeningList"></ul>
+        </section>
     </div>
+
+    <div class="auto-scroll-info" id="scrollInfo">Auto-scroll aktif...</div>
 
     <script>
-        let weddingData = {}; let targetDate;
+        let weddingData = {}; let targetDate; let countdownInterval;
 
         async function loadExternalData() {
             try {
                 const response = await fetch('wedding-data.json');
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
                 weddingData = await response.json();
                 console.log('JSON loaded:', weddingData);
                 loadData();
-            } catch (e) {
-                console.error(e); weddingData = {/* fallback */}; loadData();
+            } catch (error) {
+                console.error('JSON Error:', error);
+                weddingData = {
+                    "namaPengantin": { "pengantinWanita": "Pengantin Wanita", "pengantinPria": "Pengantin Pria" },
+                    "tanggal": "DD MMMM YYYY", "lokasi": "Lokasi Acara", "waktu": "Waktu Acara",
+                    "rekening": [], "fileGambar": "", "fileMusik": ""
+                };
+                loadData();
             }
         }
 
         function loadData() {
-            const coupleName = `${weddingData.namaPengantin?.pengantinWanita || ''} & ${weddingData.namaPengantin?.pengantinPria || ''}`;
-            document.getElementById('coverTitle').textContent = coupleName || 'Couple Name';
-            // (Update intro, details, rekening, musik sama seperti sebelumnya)
+            console.log('loadData started');
+            const wanita = weddingData.namaPengantin?.pengantinWanita || 'Wanita';
+            const pria = weddingData.namaPengantin?.pengantinPria || 'Pria';
+            const coupleName = `${wanita} & ${pria}`;
+            document.getElementById('coverTitle').textContent = coupleName;
+            document.getElementById('introTitle').textContent = `Selamat untuk ${coupleName}!`;
+            document.getElementById('introText').textContent = 'Dengan rahmat Tuhan Yang Maha Esa, kami mengundang Anda untuk merayakan hari bahagia kami.';
+            document.getElementById('namaPengantin').textContent = coupleName;
+            document.getElementById('tanggal').textContent = weddingData.tanggal || 'Tanggal belum diisi';
+            document.getElementById('lokasi').textContent = weddingData.lokasi || 'Lokasi belum diisi';
+            document.getElementById('waktu').textContent = weddingData.waktu || 'Waktu belum diisi';
+            document.getElementById('giftsText').innerHTML = 'Doa restu Anda adalah hadiah terbesar. Jika ingin memberi, transfer ke rekening di bawah ini.<br><small>Copy nomor untuk transfer mudah.</small>';
 
-            // Handle Background Animasi
+            // Background
             const fileGambar = weddingData.fileGambar;
             if (fileGambar) {
                 const ext = fileGambar.split('.').pop().toLowerCase();
                 const cover = document.getElementById('cover');
                 const video = document.getElementById('coverVideo');
-
                 if (ext === 'gif') {
-                    // GIF: Gunakan CSS background
                     cover.style.backgroundImage = `url('${fileGambar}')`;
                     video.style.display = 'none';
                 } else if (ext === 'mp4') {
-                    // MP4: Gunakan video element
                     video.src = fileGambar;
                     video.style.display = 'block';
-                    video.play().catch(e => console.log('Video preload error:', e)); // Preload silent
-                    cover.style.backgroundImage = 'none'; // Hilangkan placeholder
+                    video.load();
                 } else {
-                    // Static JPG/PNG
                     cover.style.backgroundImage = `url('${fileGambar}')`;
                     video.style.display = 'none';
                 }
             }
-            // (Sisa loadData sama)
+
+            // Musik
+            const music = document.getElementById('bgMusic');
+            if (weddingData.fileMusik) {
+                music.querySelector('source').src = weddingData.fileMusik;
+                music.load();
+                document.getElementById('musicStatus').textContent = `Dimuat: ${weddingData.fileMusik}`;
+            }
+
+            // Rekening
+            const rekeningList = document.getElementById('rekeningList');
+            rekeningList.innerHTML = '';
+            (weddingData.rekening || []).forEach(rek => {
+                const li = document.createElement('li');
+                li.className = 'rekening-item';
+                li.innerHTML = `<strong>${rek.bank}</strong><br>Nomor: ${rek.nomor}<br>a.n. ${rek.nama}`;
+                rekeningList.appendChild(li);
+            });
+
+            targetDate = parseTargetDate(weddingData.tanggal);
+            console.log('loadData done');
         }
 
-        // (Sisa script: enterInvitation, countdown, dll. sama)
-        window.addEventListener('load', loadExternalData);
+        function parseTargetDate(tanggalStr) {
+            if (!tanggalStr || tanggalStr.includes('Loading') || tanggalStr === "DD MMMM YYYY") return Date.now();
+            const months = {'Januari':0,'Februari':1,'Maret':2,'April':3,'Mei':4,'Juni':5,'Juli':6,'Agustus':7,'September':8,'Oktober':9,'November':10,'Desember':11};
+            const parts = tanggalStr.match(/(\d{1,2})\s+([A-Za-z]+)\s+(\d{4})/);
+            if (!parts) return Date.now();
+            const day = parseInt(parts[1]), monthName = parts[2], year = parseInt(parts[3]);
+            const month = months[monthName] || 0;
+            return new Date(year, month, day, 12, 0, 0).getTime();
+        }
+
+        function updateCountdown() {
+            if (!targetDate) return;
+            const difference = targetDate - Date.now();
+            const days = Math.floor(difference / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((difference % (1000 * 60)) / 1000);
+            document.getElementById('days').textContent = days.toString().padStart(2, '0');
+            document.getElementById('hours').textContent = hours.toString().padStart(2, '0');
+            document.getElementById('minutes').textContent = minutes.toString().padStart(2, '0');
+            document.getElementById('seconds').textContent = seconds.toString().padStart(2, '0');
+            const statusEl = document.getElementById('event-status');
+            if (difference < 0) {
+                statusEl.textContent = 'Hari bahagia telah tiba! Selamat! 🎉';
+                document.getElementById('countdown').style.display = 'none';
+                if (countdownInterval) clearInterval(countdownInterval);
+            } else {
+                statusEl.textContent = 'Hari bahagia akan segera tiba!';
+            }
+        }
+
+        function enterInvitation() {
+            console.log('Tombol diklik!'); // Debug
+            const cover = document.getElementById('cover');
+            const content = document.getElementById('content');
+            const video = document.getElementById('coverVideo');
+            cover.style.display = 'none'; // Hide cover & video
+            video.pause(); // Pause video kalau ada
+            content.style.display = 'block';
+            const music = document.getElementById('bgMusic');
+            music.play().catch(e => console.log('Music play error:', e));
+            startIdleDetection();
+            updateCountdown();
+            countdownInterval = setInterval(updateCountdown, 1000);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            console.log('Content shown!');
+        }
+
+        // Event Listener untuk tombol (alternatif onclick)
+        window.addEventListener('load', () => {
+            const btn = document.getElementById('enterBtn');
+            btn.addEventListener('click', enterInvitation); // Attach listener
+            loadExternalData(); // Load JSON
+        });
+
+        // (Sisa: idle detection, musik controls, forms, visibility sama seperti sebelumnya)
+        let isIdle = false, autoScrollInterval, scrollSpeed = 1, idleTime = 5000, idleTimer;
+        function startIdleDetection() {
+            ['mousemove', 'keydown', 'touchstart'].forEach(ev => document.addEventListener(ev, resetIdleTimer));
+            resetIdleTimer();
+        }
+        function resetIdleTimer() {
+            clearTimeout(idleTimer); isIdle = false; document.getElementById('scrollInfo').style.opacity = '0'; stopAutoScroll();
+            idleTimer = setTimeout(() => { isIdle = true; startAutoScroll(); document.getElementById('scrollInfo').style.opacity = '1'; }, idleTime);
+        }
+        function startAutoScroll() { if (autoScrollInterval) return; autoScrollInterval = setInterval(() => { if (isIdle && window.innerHeight + window.scrollY < document.body.offsetHeight) window.scrollBy({ top: scrollSpeed, behavior: 'smooth' }); else stopAutoScroll(); }, 50); }
+        function stopAutoScroll() { if (autoScrollInterval) { clearInterval(autoScrollInterval); autoScrollInterval = null; } }
+
+        function playMusic() {
+            document.getElementById('bgMusic').play().then(() => document.getElementById('musicStatus').textContent = 'Sedang diputar').catch(e => alert('Gagal play: ' + e.message));
+        }
+        function pauseMusic() {
+            document.getElementById('bgMusic').pause();
+            document.getElementById('musicStatus').textContent = 'Dijeda';
+        }
+
+        document.getElementById('rsvpForm').addEventListener('submit', e => { e.preventDefault(); alert('RSVP dikirim!'); e.target.reset(); });
+        document.getElementById('wishesForm').addEventListener('submit', e => { e.preventDefault(); alert('Ucapan dikirim!'); e.target.reset(); });
+
+        document.addEventListener('visibilitychange', () => {
+            const music = document.getElementById('bgMusic');
+            if (document.hidden) music.pause(); else if (!music.paused) music.play();
+        });
     </script>
 </body>
 </html>
